@@ -1,53 +1,55 @@
-const todoList = require("../todo");
-const { all, markAsComplete, add, overdue, dueToday, dueLater } = todoList();
-
-describe("Todo List Test Suite", () => {
-  beforeAll(() => {
-    const dateToday = new Date();
-    
-    [
-      {
-        title: "Prepare for weekend",
-        completed: false,
-        dueDate: new Date().toLocaleDateString(
-          "en-CA"
-        ),
-      },
-      {
-        title: "register for gym",
-        completed: false,
-        dueDate:new Date().toLocaleDateString(
-            "en-CA"
-        ),
-      },
-    ].forEach(add);
-  });
-  test("checks creating a new todo", () => {
-    expect(all.length).toEqual(2);
-    add({
-      title: "Go Buy milk",
-      completed: false,
-      dueDate: new Date().toLocaleDateString("en-CA"),
-    });
-
-    expect(all.length).toEqual(3);
-  });
-
-  test("checks marking a todo as completed", () => {
-    expect(all[0].completed).toEqual(false);
-    markAsComplete(0);
-    expect(all[0].completed).toEqual(true);
-  });
-
-  test("checks retrieval of overdue items", () => {
-    expect(overdue().length).toEqual(0);
-  });
-
-  test("checks retrieval of due today items", () => {
-    expect(dueToday().length).toEqual(3);
-  });
-
-  test("checks retrieval of due later items", () => {
-    expect(dueLater().length).toEqual(0);
-  });
-});
+const todoList = () => {
+    let dateToday = new Date();
+    const today = formattedDate(dateToday);
+    let all = [];
+    const add = (todoItem) => {
+      all.push(todoItem);
+    };
+    const markAsComplete = (index) => {
+      all[index].completed = true;
+    };
+  
+    const overdue = () => {
+      return all.filter((todo) => {
+        return todo.dueDate < today;
+      });
+    };
+  
+    const dueToday = () => {
+      return all.filter((todo) => {
+        return todo.dueDate === today;
+      });
+    };
+  
+    const dueLater = () => {
+      return all.filter((todo) => {
+        return todo.dueDate > today;
+      });
+    };
+  
+    // eslint-disable-next-line no-unused-vars
+    const toDisplayableList = (list) => {
+      return list
+        .map((todo) => {
+          return `[${todo.completed ? "x" : " "}] ${todo.title} ${
+            todo.dueDate !== today ? todo.dueDate : " "
+          }`.trim();
+        })
+        .join("\n");
+    };
+  
+    return {
+      all,
+      add,
+      markAsComplete,
+      overdue,
+      dueToday,
+      dueLater,
+    };
+  };
+  
+  const formattedDate = (d) => {
+    return d.toISOString().split("T")[0];
+  };
+  
+  module.exports = todoList;
